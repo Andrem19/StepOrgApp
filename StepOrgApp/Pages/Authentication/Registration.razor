@@ -1,4 +1,5 @@
 ﻿@page "/registration"
+@page "/registration/{Mail}/{Password}"
 @layout EmptyLayout
 @inject NavigationManager _navigationManager
 @inject AuthenticationService _authSerivce
@@ -26,8 +27,8 @@
                         }
 
                         <div class="py-2">
-                            <InputText @bind-Value="RegisterModel.Name" class="form-control" placeholder="Name..." />
-                            <ValidationMessage For="(()=>RegisterModel.Name)" />
+                            <InputText @bind-Value="RegisterModel.DisplayName" class="form-control" placeholder="Name..." />
+                            <ValidationMessage For="(()=>RegisterModel.DisplayName)" />
                         </div>
                         <div class="py-2">
                             <InputText @bind-Value="RegisterModel.Email" type="text" class="form-control" placeholder="Email..." />
@@ -60,22 +61,31 @@
     public bool ShowRegistrationErrors { get; set; }
     public IEnumerable<string> Errors { get; set; }
 
+    [Parameter]
+    public string Mail { get; set; }
+    [Parameter]
+    public string Password { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        RegisterModel.Email = Mail;
+        RegisterModel.Password = Password;
+    }
+
     private async Task RegisterUser()
     {
         ShowRegistrationErrors = false;
         IsProcessing = true;
         var result = await _authSerivce.RegisterUser(RegisterModel);
-        if (result.IsRegisterationSuccessful)
+        if (result)
         {
             //regiration is successful
+            await App.Current.MainPage.DisplayAlert("Confirm Your Email", "Go to Login", "Ok");
             _navigationManager.NavigateTo("/login");
         }
         else
         {
-            //failure
-            Errors = result.Errors;
             ShowRegistrationErrors = true;
-
         }
         IsProcessing = false;
     }

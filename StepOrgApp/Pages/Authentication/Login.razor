@@ -7,9 +7,9 @@
 
 <EditForm Model="LoginModel" OnValidSubmit="LoginUser">
     <DataAnnotationsValidator />
-    <div class="py-4">
+    <div class="py-6 mt-5">
         <div class=" row form-group ">
-            <div class="col-6 offset-3 ">
+            <div class="col-8 offset-2 ">
                 <div class="card border">
                     <div class="card-body px-lg-5 pt-4">
                         <h3 class="col-12 text-success text-center py-2">
@@ -32,7 +32,8 @@
                         </div>
                         <div class="py-2">
                             <button type="submit" class="btn btn-success btn-block"><i class="bi bi-person-bounding-box"></i> Sign in</button>
-                            <a href="/registration" class="btn btn-primary text-white m-2"><i class="bi bi-person-plus-fill"></i> Register as a new user</a>
+                            <button @onclick="ToRegistration" class="btn btn-primary text-white m-2"> Register</button>
+                            @*<NavLink href="@($"/registration/{LoginModel.Email}/{LoginModel.Password}")" class="btn btn-primary text-white m-2"><i class="bi bi-person-plus-fill"></i> Register</NavLink>*@
                         </div>
                     </div>
                 </div>
@@ -46,8 +47,21 @@
     public bool IsProcessing { get; set; } = false;
     public bool ShowSignInErrors { get; set; }
     public string Errors { get; set; }
-
     public string ReturnUrl { get; set; }
+
+    public void ToRegistration()
+    {
+        if (!string.IsNullOrEmpty(LoginModel.Email) && !string.IsNullOrEmpty(LoginModel.Password))
+        {
+            _navigationManager.NavigateTo($"registration/{LoginModel.Email}/{LoginModel.Password}", true);
+        }
+        else
+        {
+            _navigationManager.NavigateTo("registration", true);
+        }
+        
+    }
+
     private async Task LoginUser()
     {
         ShowSignInErrors = false;

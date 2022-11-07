@@ -1,22 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using Newtonsoft.Json;
 using StepOrgApp.DTOs;
 using StepOrgApp.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace StepOrgApp.Services
 {
     public class AuthenticationService
     {
         private readonly HttpClient _client;
-        private readonly AuthStateProvider _authStateProvider;
-        //private readonly AuthenticationStateProvider _authStateProvider;
+        //private readonly AuthStateProvider _authStateProvider;
+        private readonly AuthenticationStateProvider _authStateProvider;
 
-        public AuthenticationService(HttpClient client, AuthStateProvider authStateProvider)
+        public AuthenticationService(HttpClient client, AuthenticationStateProvider authStateProvider)
         {
             _client = client;
             _authStateProvider = authStateProvider; 
@@ -26,15 +23,15 @@ namespace StepOrgApp.Services
         {
             var content = JsonConvert.SerializeObject(signInRequest);
             var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
-            var response = await _client.PostAsync("api/account/login", bodyContent);
+            var response = await _client.PostAsync(SD.BaseAPIUrl + "api/account/login", bodyContent);
             var contentTemp = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<LoginModelResponse>(contentTemp);
 
             if (response.IsSuccessStatusCode)
             {
-                Preferences.Set(SD.AccessToken, result.Token);
-                string serializedUserDetails = JsonConvert.SerializeObject(result.UserDTO);
-                Preferences.Set(SD.UserDetails, serializedUserDetails);
+                await SecureStorage.SetAsync(SD.AccessToken, result.Token);
+                string serializedUserDetails = JsonConvert.SerializeObject(result);
+                await SecureStorage.SetAsync(SD.UserDetails, serializedUserDetails);
                 ((AuthStateProvider)_authStateProvider).NotifyUserLoggedIn(result.Token);
                 _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Token);
                 return new LoginModelResponse() { IsAuthSuccessful = true };
@@ -47,30 +44,29 @@ namespace StepOrgApp.Services
 
         public async Task Logout()
         {
-            Preferences.Remove(SD.AccessToken);
-            Preferences.Remove(SD.UserDetails);
+            SecureStorage.Remove(SD.AccessToken);
+            SecureStorage.Remove(SD.UserDetails);
 
             ((AuthStateProvider)_authStateProvider).NotifyUserLogout();
 
             _client.DefaultRequestHeaders.Authorization = null;
         }
 
-        public async Task<RegisterModelResponse> RegisterUser(RegisterModel signUpRequest)
+        public async Task<bool> RegisterUser(RegisterModel signUpRequest)
         {
-            var content = JsonConvert.SerializeObject(signUpRequest);
+            RegisterModelRequest model = new();
+            model.displayName = signUpRequest.DisplayName;
+            model.email = signUpRequest.Email;
+            model.password = signUpRequest.Password;
+            var content = JsonConvert.SerializeObject(model);
             var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
-            var response = await _client.PostAsync("api/account/register", bodyContent);
-            var contentTemp = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<RegisterModelResponse>(contentTemp);
-
+            var response = await _client.PostAsync(SD.BaseAPIUrl + "api/Account/register", bodyContent);
             if (response.IsSuccessStatusCode)
             {
-                return new RegisterModelResponse { IsRegisterationSuccessful = true };
+                return true;
             }
-            else
-            {
-                return new RegisterModelResponse { IsRegisterationSuccessful = false, Errors = result.Errors };
-            }
+            return false;
+
         }
     }
 }

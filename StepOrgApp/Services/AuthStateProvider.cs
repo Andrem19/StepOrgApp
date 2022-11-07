@@ -21,7 +21,7 @@ namespace StepOrgApp.Services
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var token = Preferences.Get(SD.AccessToken, string.Empty);
+            var token = await SecureStorage.GetAsync(SD.AccessToken);
             if (token == null)
             {
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));

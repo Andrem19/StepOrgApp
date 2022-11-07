@@ -10,7 +10,7 @@ namespace StepOrgApp.Models
     public class RegisterModel
     {
         [Required(ErrorMessage = "Name is required")]
-        public string Name { get; set; }
+        public string DisplayName { get; set; }
 
         [Required(ErrorMessage = "Email is required")]
         [RegularExpression("^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$", ErrorMessage = "Invalid email address")]

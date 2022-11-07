@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebView.Maui;
+using Microsoft.Extensions.Configuration;
 using StepOrgApp.Services;
 
 namespace StepOrgApp;
@@ -15,13 +17,18 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 			});
-
-		builder.Services.AddMauiBlazorWebView();
+        builder.Services.AddScoped<HttpClient>();
+        //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(SD.BaseAPIUrl) });
+        builder.Services.AddMauiBlazorWebView();
 		#if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
 #endif
-		builder.Services.AddScoped<AuthenticationService>();
+        builder.Services.AddAuthorizationCore();
+        //builder.Services.AddScoped<AuthStateProvider>();
+        builder.Services.AddScoped<AuthenticationService>();
         builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
+        
+		builder.Services.AddBlazorWebView();
 
         return builder.Build();
 	}
