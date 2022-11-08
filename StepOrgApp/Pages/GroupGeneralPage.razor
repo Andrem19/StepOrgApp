@@ -1,23 +1,41 @@
-﻿<h4>Group General</h4>
-<div class="container-fluid py-2">
-    <h2 class="font-weight-light">Bootstrap 5 Horizontal Scrolling Cards with Flexbox</h2>
+﻿<div class="container-fluid py-2">
+    <h3>My Groups</h3>
     <div class="d-flex flex-row flex-nowrap overflow-auto">
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
-        <div class="card card-body">Card</div>
+        <div @onclick="ChangeColor" class="me-1 ms-1 @bgColor">
+            <image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" />
+            <p class="ms-3 text-primary fw-bold">Text</p>
+        </div>
+        <div class="me-1 ms-1">
+            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
+            <p class="ms-3 text-primary fw-bold">Text</p>
+        </div>
+        <div class="me-1 ms-1">
+            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
+            <p class="ms-3 text-primary fw-bold">Text</p>
+        </div>
+        <div class="me-1 ms-1">
+            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
+            <p class="ms-3 text-primary fw-bold">Text</p>
+        </div>
+        <div class="me-1 ms-1">
+            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
+            <p class="ms-3 text-primary fw-bold">Text</p>
+        </div>
+        <div class="me-1 ms-1">
+            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
+            <p class="ms-3 text-primary fw-bold">Text</p>
+        </div>
+        <div class="me-1 ms-1">
+            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
+            <p class="ms-3 text-primary fw-bold">Text</p>
+        </div>
+        
     </div>
 </div>
 @code {
-
+    public bool status = true;
+    public string bgColor  => status ? "bg-light" : "bg-info";
+    public void ChangeColor(){
+        status = !status;
+    }
 }

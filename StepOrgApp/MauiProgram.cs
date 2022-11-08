@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.Extensions.Configuration;
+using MudBlazor.Services;
 using StepOrgApp.Services;
 
 namespace StepOrgApp;
@@ -27,8 +28,8 @@ public static class MauiProgram
         //builder.Services.AddScoped<AuthStateProvider>();
         builder.Services.AddScoped<AuthenticationService>();
         builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
-        
-		builder.Services.AddBlazorWebView();
+        builder.Services.AddMudServices();
+        builder.Services.AddBlazorWebView();
 
         return builder.Build();
 	}
