@@ -1,40 +1,28 @@
 ﻿<div class="container-fluid py-2">
     <h3>My Groups</h3>
     <div class="d-flex flex-row flex-nowrap overflow-auto">
-        <div @onclick="ChangeColor" class="me-1 ms-1 @bgColor">
-            <image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" />
+
+        <div @onclick="ChangeColor" class="me-1 ms-1 position-relative @bgColor">
+            <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg"/>
+            <span class="@IsVisible float-end badge top-0 end-0 rounded-pill position-absolute badge-notification bg-danger">1</span>
             <p class="ms-3 text-primary fw-bold">Text</p>
         </div>
-        <div class="me-1 ms-1">
-            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
+        <div @onclick="ChangeColor" class="me-1 ms-1 position-relative @bgColor">
+            <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" />
+            <span class="float-end badge top-0 end-0 rounded-pill position-absolute badge-notification bg-danger">1</span>
             <p class="ms-3 text-primary fw-bold">Text</p>
         </div>
-        <div class="me-1 ms-1">
-            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
+        <div @onclick="ChangeColor" class="me-1 ms-1 position-relative @bgColor">
+            <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" />
+            <span class="float-end badge top-0 end-0 rounded-pill position-absolute badge-notification bg-danger">1</span>
             <p class="ms-3 text-primary fw-bold">Text</p>
         </div>
-        <div class="me-1 ms-1">
-            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
-            <p class="ms-3 text-primary fw-bold">Text</p>
-        </div>
-        <div class="me-1 ms-1">
-            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
-            <p class="ms-3 text-primary fw-bold">Text</p>
-        </div>
-        <div class="me-1 ms-1">
-            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
-            <p class="ms-3 text-primary fw-bold">Text</p>
-        </div>
-        <div class="me-1 ms-1">
-            <div><image style="height: 70px; width: 70px; background-color: moccasin;" class="rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" /></div>
-            <p class="ms-3 text-primary fw-bold">Text</p>
-        </div>
-        
     </div>
 </div>
 @code {
     public bool status = true;
     public string bgColor  => status ? "bg-light" : "bg-info";
+    public string IsVisible => status ? "visible" : "invisible";
     public void ChangeColor(){
         status = !status;
     }
