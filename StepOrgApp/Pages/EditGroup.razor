@@ -1,0 +1,89 @@
+﻿@page "/editgroup/{currentGroup}"
+@using System.Net.Http.Headers
+@inject IFileReaderService _fileReaderService
+@inject GroupServiceRequest _groupService
+@inject NavigationManager _navigationManager
+
+<h3>EditGroup</h3>
+<EditForm Model="editGroup" OnValidSubmit="EditName">
+    <DataAnnotationsValidator />
+    <div class="container-fluid">
+        <h3 class="mt-1">AddGroup</h3>
+
+        <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label">Short Name</label>
+            <InputText @bind-Value="editGroup.ShortName" type="name" class="form-control" id="exampleFormControlInput1" placeholder="Short Name" />
+            <ValidationMessage For="(()=>editGroup.ShortName)"></ValidationMessage>
+        </div>
+        <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label">Name</label>
+            <InputText @bind-Value="editGroup.Name" type="name" class="form-control" id="exampleFormControlInput1" placeholder="Name" />
+            <ValidationMessage For="(()=>editGroup.Name)"></ValidationMessage>
+        </div>
+        <div class="py-2">
+            <button type="submit" class="btn btn-success btn-block"><i class="bi bi-person-bounding-box"></i> Change Name</button>
+        </div>
+    </div>
+</EditForm>
+@*<input type="file" @ref="_input" @onchange="HandleSelected" accept=".jpg, .jpeg, png" />*@
+<div class="mb-3">
+    <label for="formFile" class="form-label">Default file input example</label>
+    <input @ref="_input" @onchange="HandleSelected" class="form-control" type="file" id="formFile">
+</div>
+@if (ImgUrl != null)
+{
+    <div>
+        <img src="@ImgUrl" style="width:300px" />
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public string currentGroup { get; set; }
+    private ElementReference _input;
+    [Parameter]
+    public string ImgUrl { get; set; }
+    [Inject]
+    public IFileReaderService FileReaderService { get; set; }
+
+    CreateGroup editGroup = new();
+    GroupDto currentGroupDto = new();
+
+    private async Task HandleSelected()
+    {
+        foreach (var file in await FileReaderService.CreateReference(_input).EnumerateFilesAsync())
+        {
+            if (file != null)
+            {
+                var fileInfo = await file.ReadFileInfoAsync();
+                using (var ms = await file.CreateMemoryStreamAsync(4 * 1024))
+                {
+                    var content = new MultipartFormDataContent();
+                    content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
+                    content.Add(new StreamContent(ms, Convert.ToInt32(ms.Length)), "image", fileInfo.Name);
+                    await _groupService.UploadProductImage(content, currentGroup);
+                }
+            }
+        }
+        _navigationManager.NavigateTo("/");
+    }
+
+    public async void EditName()
+    {
+        await _groupService.ChangeGroupName(editGroup);
+        StateHasChanged();
+        _navigationManager.NavigateTo("/");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentGroupDto = await _groupService.GetGroupById(currentGroup);
+        if (currentGroupDto != null)
+        {
+            editGroup.ShortName = currentGroupDto.ShortName;
+            editGroup.Name = currentGroupDto.GroupName;
+        }
+        
+    }
+}

@@ -1,6 +1,11 @@
-﻿using System;
+﻿using Android.Views;
+using Newtonsoft.Json;
+using StepOrgApp.DTOs;
+using StepOrgApp.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,13 +18,70 @@ namespace StepOrgApp.Services.ApiRequests
         {
             _httpClient = httpClient;
         }
-        //public async Task<List<object>> GetAllMyGroups()
-        //{
-            
-        //}
-        //public async Task<object> CreateGroup()
-        //{
+        public async Task<List<GroupDto>> GetAllMyGroups()
+        {
+            string token = await SecureStorage.GetAsync(SD.AccessToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+            var response = await _httpClient.GetAsync(SD.BaseAPIUrl + "api/group");
+            if (response.IsSuccessStatusCode)
+            {
+                var contentTemp = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<List<GroupDto>>(contentTemp);
+                return result;
+            }
+            return null;
+        }
 
-        //}
+        public async Task<GroupDto> GetGroupById(string Id)
+        {
+            string token = await SecureStorage.GetAsync(SD.AccessToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+            var response = await _httpClient.GetAsync(SD.BaseAPIUrl + $"api/group/getbyid?Id={Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                var contentTemp = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<GroupDto>(contentTemp);
+                return result;
+            }
+            return null;
+        }
+        public async Task<string> UploadProductImage(MultipartFormDataContent content, string groupId)
+        {
+            var postResult = await _httpClient.PostAsync(SD.BaseAPIUrl + $"api/group/Avatar?Id={groupId}", content);
+            var postContent = await postResult.Content.ReadAsStringAsync();
+            if (!postResult.IsSuccessStatusCode)
+            {
+                throw new ApplicationException(postContent);
+            }
+            else
+            {
+                var imgUrl = Path.Combine("https://localhost:5011/", postContent);
+                return imgUrl;
+            }
+        }
+        public async Task<bool> ChangeGroupName(CreateGroup editGroup)
+        {
+            string token = await SecureStorage.GetAsync(SD.AccessToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+            var response = await _httpClient.GetAsync(SD.BaseAPIUrl + $"api/group/changeName?ShortName={editGroup.ShortName}&Name={editGroup.Name}");
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            return false;
+        }
+        public async Task<GroupDto> CreateGroup(CreateGroup newGroup)
+        {
+            string token = await SecureStorage.GetAsync(SD.AccessToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+            var response = await _httpClient.GetAsync(SD.BaseAPIUrl + $"api/group/create?ShortName={newGroup.ShortName}&Name={newGroup.Name}");
+            if (response.IsSuccessStatusCode)
+            {
+                var contentTemp = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<GroupDto>(contentTemp);
+                return result;
+            }
+            return null;
+        }
     }
 }

@@ -1,29 +1,74 @@
-﻿<div class="container-fluid py-2">
-    <h3>My Groups</h3>
-    <div class="d-flex flex-row flex-nowrap overflow-auto">
-
-        <div @onclick="ChangeColor" class="me-1 ms-1 position-relative @bgColor">
-            <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg"/>
-            <span class="@IsVisible float-end badge top-0 end-0 rounded-pill position-absolute badge-notification bg-danger">1</span>
-            <p class="ms-3 text-primary fw-bold">Text</p>
-        </div>
-        <div @onclick="ChangeColor" class="me-1 ms-1 position-relative @bgColor">
-            <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" />
-            <span class="float-end badge top-0 end-0 rounded-pill position-absolute badge-notification bg-danger">1</span>
-            <p class="ms-3 text-primary fw-bold">Text</p>
-        </div>
-        <div @onclick="ChangeColor" class="me-1 ms-1 position-relative @bgColor">
-            <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661205175/HomeOrganizer/l5mxviojmvom5evocayt.jpg" />
-            <span class="float-end badge top-0 end-0 rounded-pill position-absolute badge-notification bg-danger">1</span>
-            <p class="ms-3 text-primary fw-bold">Text</p>
+﻿@inject NavigationManager _navigationManager
+@inject GroupServiceRequest _groupService
+@if (IsProcessing)
+{
+    <p>Loading...</p>
+}
+else
+{
+<div class="container-fluid bg-secondary p-0">
+    <div class="bg-light mt-0 h-25 w-100 d-inline-block">
+            <h3 class="ms-2 text-dark">My Groups <i @onclick="GoToEditGroup" class="ms-1 fa fa-pencil text-danger"></i> <i @onclick="GoToAddGroup" class="ms-1 fa fa-plus-square-o text-info"></i> </h3>
+        <div class="ms-1 d-flex flex-row flex-nowrap overflow-auto">
+            @if (groupList != null)
+            {
+                @foreach (var group in groupList)
+                {
+                    <div @onclick="() => ChouseGroupe(group.Id)" class="me-1 ms-1 position-relative @bgColor">
+                            @if (string.IsNullOrEmpty(group.PictureUrl))
+                            {
+                                <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661171398/HomeOrganizer/mgrw3vuifbmmhupjmfr8.jpg" />
+                            }
+                            else
+                            {
+                                <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="@group.PictureUrl" />
+                            }
+                            <span class="@IsVisible float-end badge top-0 end-0 rounded-pill position-absolute fw-bold badge-notification bg-danger"><i class="fa fa-bolt" aria-hidden="true"></i></span>
+                        <p class="text-center text-primary fw-bold">@group.ShortName</p>
+                    </div>
+                }
+            }
+            else
+            {
+                <h1>You haven`t any groups. Please Create</h1>
+            }
+           
         </div>
     </div>
+    <div class="bg-light mt-2 w-100 d-inline-block">
+        <p>Test</p><br/>
+        <p>Test</p><br />
+        <p>Test</p><br/>
+        <p>Test</p><br />
+    </div>
 </div>
+}
 @code {
     public bool status = true;
     public string bgColor  => status ? "bg-light" : "bg-info";
-    public string IsVisible => status ? "visible" : "invisible";
-    public void ChangeColor(){
+    public string IsVisible = "visible";
+    //public string IsVisible => status ? "visible" : "invisible";
+    public void ChouseGroupe(int id)
+    {
         status = !status;
+        SecureStorage.SetAsync(SD.CurrentGroup, id.ToString());
+    }
+    public bool IsProcessing { get; set; } = false;
+    List<GroupDto> groupList { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsProcessing = true;
+        groupList = await _groupService.GetAllMyGroups();
+        IsProcessing = false;
+    }
+    public void GoToAddGroup()
+    {
+        _navigationManager.NavigateTo("/addgroup");
+    }
+    public async void GoToEditGroup()
+    {
+        string currentGroup = await SecureStorage.GetAsync(SD.CurrentGroup);
+        _navigationManager.NavigateTo($"/editgroup/{currentGroup}");
     }
 }

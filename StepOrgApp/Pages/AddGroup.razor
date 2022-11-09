@@ -1,0 +1,33 @@
+﻿@page "/addgroup"
+@inject GroupServiceRequest _groupService
+@inject NavigationManager _navigationManager
+
+<EditForm Model="newGroup" OnValidSubmit="CreateNewGroup">
+    <DataAnnotationsValidator />
+        <div class="container-fluid">
+            <h3 class="mt-1">AddGroup</h3>
+
+            <div class="mb-3">
+                <label for="exampleFormControlInput1" class="form-label">Short Name</label>
+                <InputText @bind-Value="newGroup.ShortName" type="name" class="form-control" id="exampleFormControlInput1" placeholder="Short Name" />
+                <ValidationMessage For="(()=>newGroup.ShortName)"></ValidationMessage>
+            </div>
+            <div class="mb-3">
+                <label for="exampleFormControlInput1" class="form-label">Name</label>
+                    <InputText @bind-Value="newGroup.Name" type="name" class="form-control" id="exampleFormControlInput1" placeholder="Name" />
+                <ValidationMessage For="(()=>newGroup.Name)"></ValidationMessage>
+            </div>
+            <div class="py-2">
+                <button type="submit" class="btn btn-success btn-block"><i class="bi bi-person-bounding-box"></i> Create New Group</button>
+            </div>
+        </div>
+</EditForm>
+
+@code {
+    CreateGroup newGroup = new();
+    public async Task CreateNewGroup()
+    {
+        await _groupService.CreateGroup(newGroup);
+        _navigationManager.NavigateTo("/");
+    }
+}

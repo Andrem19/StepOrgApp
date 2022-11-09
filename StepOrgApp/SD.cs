@@ -11,5 +11,6 @@ namespace StepOrgApp
         public const string BaseAPIUrl = "https://remartorg.herokuapp.com/";
         public const string AccessToken = "accessToken";
         public const string UserDetails = "userDetails";
+        public const string CurrentGroup = "currentGroup";
     }
 }
