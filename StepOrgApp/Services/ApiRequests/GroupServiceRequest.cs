@@ -45,25 +45,19 @@ namespace StepOrgApp.Services.ApiRequests
             }
             return null;
         }
-        public async Task<string> UploadProductImage(MultipartFormDataContent content, string groupId)
-        {
-            var postResult = await _httpClient.PostAsync(SD.BaseAPIUrl + $"api/group/Avatar?Id={groupId}", content);
-            var postContent = await postResult.Content.ReadAsStringAsync();
-            if (!postResult.IsSuccessStatusCode)
-            {
-                throw new ApplicationException(postContent);
-            }
-            else
-            {
-                var imgUrl = Path.Combine("https://localhost:5011/", postContent);
-                return imgUrl;
-            }
-        }
-        public async Task<bool> ChangeGroupName(CreateGroup editGroup)
+        public async Task<bool> UploadProductImage(MultipartFormDataContent content, string groupId)
         {
             string token = await SecureStorage.GetAsync(SD.AccessToken);
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
-            var response = await _httpClient.GetAsync(SD.BaseAPIUrl + $"api/group/changeName?ShortName={editGroup.ShortName}&Name={editGroup.Name}");
+            var postResult = await _httpClient.PostAsync(SD.BaseAPIUrl + $"api/group/Avatar?groupId={groupId}", content);
+            var postContent = await postResult.Content.ReadAsStringAsync();
+            return true;
+        }
+        public async Task<bool> ChangeGroupName(CreateGroup editGroup, string groupId)
+        {
+            string token = await SecureStorage.GetAsync(SD.AccessToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+            var response = await _httpClient.GetAsync(SD.BaseAPIUrl + $"api/group/changeName?ShortName={editGroup.ShortName}&Name={editGroup.Name}&groupId={groupId}");
             if (response.IsSuccessStatusCode)
             {
                 return true;

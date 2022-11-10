@@ -14,14 +14,15 @@ else
             {
                 @foreach (var group in groupList)
                 {
-                    <div @onclick="() => ChouseGroupe(group.Id)" class="me-1 ms-1 position-relative @bgColor">
-                            @if (string.IsNullOrEmpty(group.PictureUrl))
+                        <div @onclick="() => ChouseGroupe(group.Id)" class="me-1 ms-1 position-relative @bgColor(group.IsSelected)">
+                            @if (!string.IsNullOrEmpty(group.PictureUrl))
                             {
-                                <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661171398/HomeOrganizer/mgrw3vuifbmmhupjmfr8.jpg" />
+                                @*<img class="card-img-top img-fluid d-block mx-auto mb-3" src="@group.PictureUrl" alt="menuitem image">*@
+                                <img style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="@group.PictureUrl" />
                             }
                             else
                             {
-                                <image style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="@group.PictureUrl" />
+                                <img style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661171398/HomeOrganizer/mgrw3vuifbmmhupjmfr8.jpg" />
                             }
                             <span class="@IsVisible float-end badge top-0 end-0 rounded-pill position-absolute fw-bold badge-notification bg-danger"><i class="fa fa-bolt" aria-hidden="true"></i></span>
                         <p class="text-center text-primary fw-bold">@group.ShortName</p>
@@ -43,23 +44,35 @@ else
     </div>
 </div>
 }
+
 @code {
-    public bool status = true;
-    public string bgColor  => status ? "bg-light" : "bg-info";
+    List<GroupDto> groupList { get; set; } = new();
+    public string bgColor(bool IsSelected) => IsSelected ? "bg-info" : "bg-light";
+
     public string IsVisible = "visible";
-    //public string IsVisible => status ? "visible" : "invisible";
-    public void ChouseGroupe(int id)
+    public async void ChouseGroupe(int id)
     {
-        status = !status;
+        string resSelectedGroup = await SecureStorage.GetAsync(SD.CurrentGroup);
+        if (resSelectedGroup != null)
+        {
+            groupList.FirstOrDefault(x => x.Id == Convert.ToInt32(resSelectedGroup)).IsSelected = false;
+        }
+
+        groupList.FirstOrDefault(x => x.Id == id).IsSelected = true;
         SecureStorage.SetAsync(SD.CurrentGroup, id.ToString());
+        StateHasChanged();
     }
     public bool IsProcessing { get; set; } = false;
-    List<GroupDto> groupList { get; set; } = new();
+
 
     protected override async Task OnInitializedAsync()
     {
         IsProcessing = true;
         groupList = await _groupService.GetAllMyGroups();
+        if (groupList.Any())
+        {
+            ChouseGroupe(groupList[0].Id);
+        }
         IsProcessing = false;
     }
     public void GoToAddGroup()

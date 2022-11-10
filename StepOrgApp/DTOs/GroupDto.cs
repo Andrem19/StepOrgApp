@@ -13,5 +13,6 @@ namespace StepOrgApp.DTOs
         public List<PayloadDto>? Payloads { get; set; }
         public bool IsAds { get; set; }
         public List<AdDto>? Ad { get; set; }
+        public bool IsSelected { get; set; } = false;
     }
 }

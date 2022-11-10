@@ -1,5 +1,7 @@
 ﻿@page "/editgroup/{currentGroup}"
 @using System.Net.Http.Headers
+@using Plugin.Media
+@using Plugin.Media.Abstractions
 @inject IFileReaderService _fileReaderService
 @inject GroupServiceRequest _groupService
 @inject NavigationManager _navigationManager
@@ -28,50 +30,52 @@
 @*<input type="file" @ref="_input" @onchange="HandleSelected" accept=".jpg, .jpeg, png" />*@
 <div class="mb-3">
     <label for="formFile" class="form-label">Default file input example</label>
-    <input @ref="_input" @onchange="HandleSelected" class="form-control" type="file" id="formFile">
+    <input @onchange="UoloadImage" class="form-control" type="file" id="formFile">
 </div>
-@if (ImgUrl != null)
-{
-    <div>
-        <img src="@ImgUrl" style="width:300px" />
-    </div>
-}
+
+    
+
 
 
 @code {
     [Parameter]
     public string currentGroup { get; set; }
-    private ElementReference _input;
-    [Parameter]
-    public string ImgUrl { get; set; }
-    [Inject]
-    public IFileReaderService FileReaderService { get; set; }
 
     CreateGroup editGroup = new();
     GroupDto currentGroupDto = new();
 
-    private async Task HandleSelected()
+    private async void UoloadImage()
     {
-        foreach (var file in await FileReaderService.CreateReference(_input).EnumerateFilesAsync())
+        await CrossMedia.Current.Initialize();
+
+        if (!CrossMedia.Current.IsPickPhotoSupported)
         {
-            if (file != null)
-            {
-                var fileInfo = await file.ReadFileInfoAsync();
-                using (var ms = await file.CreateMemoryStreamAsync(4 * 1024))
-                {
-                    var content = new MultipartFormDataContent();
-                    content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
-                    content.Add(new StreamContent(ms, Convert.ToInt32(ms.Length)), "image", fileInfo.Name);
-                    await _groupService.UploadProductImage(content, currentGroup);
-                }
-            }
+            await App.Current.MainPage.DisplayAlert("No PickPhoto", ":( No PickPhoto available.", "OK");
+            return;
+        }
+
+        var _mediaFile = await MediaPicker.Default.PickPhotoAsync();
+        
+        if (_mediaFile != null)
+        {
+            var newFile = Path.Combine(FileSystem.CacheDirectory, _mediaFile.FileName);
+
+                var content = new MultipartFormDataContent();
+
+                content.Add(new StreamContent(await _mediaFile.OpenReadAsync()),
+                    "\"file\"",
+                    $"\"{newFile}\"");
+
+                await _groupService.UploadProductImage(content, currentGroup);
         }
         _navigationManager.NavigateTo("/");
     }
 
+    
+
     public async void EditName()
     {
-        await _groupService.ChangeGroupName(editGroup);
+        await _groupService.ChangeGroupName(editGroup, currentGroup);
         StateHasChanged();
         _navigationManager.NavigateTo("/");
     }
