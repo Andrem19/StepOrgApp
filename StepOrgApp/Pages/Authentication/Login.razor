@@ -67,7 +67,7 @@
         ShowSignInErrors = false;
         IsProcessing = true;
         var result = await _authSerivce.Login(LoginModel);
-        if (result.IsAuthSuccessful)
+        if (result != null)
         {
             //regiration is successful
             var absoluteUri = new Uri(_navigationManager.Uri);
@@ -81,13 +81,6 @@
             {
                 _navigationManager.NavigateTo("/" + ReturnUrl);
             }
-        }
-        else
-        {
-            //failure
-            Errors = result.ErrorMessage;
-            ShowSignInErrors = true;
-
         }
         IsProcessing = false;
     }

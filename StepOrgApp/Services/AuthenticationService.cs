@@ -34,11 +34,11 @@ namespace StepOrgApp.Services
                 await SecureStorage.SetAsync(SD.UserDetails, serializedUserDetails);
                 ((AuthStateProvider)_authStateProvider).NotifyUserLoggedIn(result.Token);
                 _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Token);
-                return new LoginModelResponse() { IsAuthSuccessful = true };
+                return new LoginModelResponse();
             }
             else
             {
-                return result;
+                return null;
             }
         }
 
@@ -46,6 +46,8 @@ namespace StepOrgApp.Services
         {
             SecureStorage.Remove(SD.AccessToken);
             SecureStorage.Remove(SD.UserDetails);
+            SecureStorage.Remove(SD.CurrentGroup);
+            SecureStorage.Remove(SD.ProfilePicture);
 
             ((AuthStateProvider)_authStateProvider).NotifyUserLogout();
 

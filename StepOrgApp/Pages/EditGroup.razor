@@ -27,11 +27,12 @@
         </div>
     </div>
 </EditForm>
-@*<input type="file" @ref="_input" @onchange="HandleSelected" accept=".jpg, .jpeg, png" />*@
 <div class="mb-3">
     <label for="formFile" class="form-label">Default file input example</label>
     <input @onchange="UoloadImage" class="form-control" type="file" id="formFile">
 </div>
+
+<div><button @onclick="() => DeleteGroup(currentGroup)" class="btn btn-danger">Delete Group</button></div>
 
     
 
@@ -55,23 +56,23 @@
         }
 
         var _mediaFile = await MediaPicker.Default.PickPhotoAsync();
-        
+
         if (_mediaFile != null)
         {
             var newFile = Path.Combine(FileSystem.CacheDirectory, _mediaFile.FileName);
 
-                var content = new MultipartFormDataContent();
+            var content = new MultipartFormDataContent();
 
-                content.Add(new StreamContent(await _mediaFile.OpenReadAsync()),
-                    "\"file\"",
-                    $"\"{newFile}\"");
+            content.Add(new StreamContent(await _mediaFile.OpenReadAsync()),
+                "\"file\"",
+                $"\"{newFile}\"");
 
-                await _groupService.UploadProductImage(content, currentGroup);
+            await _groupService.UploadProductImage(content, currentGroup);
         }
         _navigationManager.NavigateTo("/");
     }
 
-    
+
 
     public async void EditName()
     {
@@ -88,6 +89,11 @@
             editGroup.ShortName = currentGroupDto.ShortName;
             editGroup.Name = currentGroupDto.GroupName;
         }
-        
+
+    }
+    public async void DeleteGroup(string currentGroup)
+    {
+        await _groupService.DeleteGroup(currentGroup);
+        _navigationManager.NavigateTo("/");
     }
 }

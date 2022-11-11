@@ -1,5 +1,5 @@
-﻿using Android.Views;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using StepOrg.DTOs;
 using StepOrgApp.DTOs;
 using StepOrgApp.Models;
 using System;
@@ -27,6 +27,19 @@ namespace StepOrgApp.Services.ApiRequests
             {
                 var contentTemp = await response.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<List<GroupDto>>(contentTemp);
+                return result;
+            }
+            return null;
+        }
+        public async Task<List<UserGroupDTO>> GetMyGroupsNamesAndAvatars()
+        {
+            string token = await SecureStorage.GetAsync(SD.AccessToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+            var response = await _httpClient.GetAsync(SD.BaseAPIUrl + "api/account/getMyGroup");
+            if (response.IsSuccessStatusCode)
+            {
+                var contentTemp = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<List<UserGroupDTO>>(contentTemp);
                 return result;
             }
             return null;
@@ -76,6 +89,17 @@ namespace StepOrgApp.Services.ApiRequests
                 return result;
             }
             return null;
+        }
+        public async Task<bool> DeleteGroup(string Id)
+        {
+            string token = await SecureStorage.GetAsync(SD.AccessToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+            var response = await _httpClient.DeleteAsync(SD.BaseAPIUrl + $"api/group?GroupId={Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

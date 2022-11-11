@@ -1,10 +1,18 @@
 ﻿@inject NavigationManager _navigationManager
+@attribute [Authorize]
 
-<AuthorizeView>
-	<Authorized>
-<div class="top-row ps-3 navbar navbar-dark">
+@if (IsLoading)
+{
+	<p>Loading...</p>
+}
+else
+{
+<div class="top-row ps-1 navbar navbar-dark">
 	<div class="container-fluid">
-			<a class="navbar-brand fw-bold" href="">REMART</a>
+				<div class="">
+					<img style="height: 37px; width: 37px;" class="float-start m-0 position-relative rounded-circle" src="@Avatar" />
+				</div>
+				<a class="navbar-brand fw-bold" href="">REMART</a>
 		<button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
 			<span class="navbar-toggler-icon"></span>
 		</button>
@@ -25,15 +33,27 @@
 		</div>
 	</nav>
 </div>
-</Authorized>
-</AuthorizeView>
+}
 @code {
+	private LoginModelResponse userDetails { get; set; }
+	private string Avatar { get; set; }
 	private bool collapseNavMenu = true;
+	private bool IsLoading { get; set; } = false;
 
 	private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
 	private void ToggleNavMenu()
 	{
 		collapseNavMenu = !collapseNavMenu;
+	}
+	protected async override Task OnInitializedAsync()
+	{
+		IsLoading = true;
+		Avatar = await SecureStorage.GetAsync(SD.ProfilePicture);
+		if (string.IsNullOrEmpty(Avatar))
+		{
+			Avatar = "images/avatar.png";
+		}
+		IsLoading = false;
 	}
 }

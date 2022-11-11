@@ -8,7 +8,7 @@ namespace StepOrgApp.DTOs
         public string ShortName { get; set; }
         public string GroupName { get; set; }
         public string? PictureUrl { get; set; }
-        public List<UserInGroupDto> Users { get; set; }
+        public List<UserInGroupDto> UsersInGroup { get; set; }
         public bool IsPayloads { get; set; }
         public List<PayloadDto>? Payloads { get; set; }
         public bool IsAds { get; set; }

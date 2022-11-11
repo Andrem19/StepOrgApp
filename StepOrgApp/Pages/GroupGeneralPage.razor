@@ -1,4 +1,5 @@
-﻿@inject NavigationManager _navigationManager
+﻿@using StepOrg.DTOs
+@inject NavigationManager _navigationManager
 @inject GroupServiceRequest _groupService
 @if (IsProcessing)
 {
@@ -8,16 +9,15 @@ else
 {
 <div class="container-fluid bg-secondary p-0">
     <div class="bg-light mt-0 h-25 w-100 d-inline-block">
-            <h3 class="ms-2 text-dark">My Groups <i @onclick="GoToEditGroup" class="ms-1 fa fa-pencil text-danger"></i> <i @onclick="GoToAddGroup" class="ms-1 fa fa-plus-square-o text-info"></i> </h3>
+            <h3 class="ms-2 text-dark">My Groups <i @onclick="GoToAddGroup" class="ms-1 fa fa-plus-square-o text-info"></i><i @onclick="GoToEditGroup" class="@IsVisible ms-1 fa fa-pencil text-danger"></i> </h3>
         <div class="ms-1 d-flex flex-row flex-nowrap overflow-auto">
             @if (groupList != null)
             {
                 @foreach (var group in groupList)
                 {
-                        <div @onclick="() => ChouseGroupe(group.Id)" class="me-1 ms-1 position-relative @bgColor(group.IsSelected)">
+                        <div @onclick="() => ChouseGroupe(group.GroupId)" class="me-1 ms-1 position-relative @bgColor(group.IsSelected)">
                             @if (!string.IsNullOrEmpty(group.PictureUrl))
                             {
-                                @*<img class="card-img-top img-fluid d-block mx-auto mb-3" src="@group.PictureUrl" alt="menuitem image">*@
                                 <img style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="@group.PictureUrl" />
                             }
                             else
@@ -25,7 +25,7 @@ else
                                 <img style="height: 70px; width: 70px; background-color: moccasin;" class="position-relative rounded-circle" src="https://res.cloudinary.com/dodijnztn/image/upload/v1661171398/HomeOrganizer/mgrw3vuifbmmhupjmfr8.jpg" />
                             }
                             <span class="@IsVisible float-end badge top-0 end-0 rounded-pill position-absolute fw-bold badge-notification bg-danger"><i class="fa fa-bolt" aria-hidden="true"></i></span>
-                        <p class="text-center text-primary fw-bold">@group.ShortName</p>
+                        <p class="text-center text-primary fw-bold">@group.Name</p>
                     </div>
                 }
             }
@@ -46,20 +46,41 @@ else
 }
 
 @code {
-    List<GroupDto> groupList { get; set; } = new();
+    List<UserGroupDTO> groupList { get; set; } = new();
+    public GroupDto fullCurrentGroup { get; set; }
     public string bgColor(bool IsSelected) => IsSelected ? "bg-info" : "bg-light";
-
-    public string IsVisible = "visible";
+    public bool IsUserCreatorOfCurrentGroup { get; set; } = false;
+    public string IsVisible => IsUserCreatorOfCurrentGroup? "visible" : "invisible";
     public async void ChouseGroupe(int id)
     {
         string resSelectedGroup = await SecureStorage.GetAsync(SD.CurrentGroup);
         if (resSelectedGroup != null)
         {
-            groupList.FirstOrDefault(x => x.Id == Convert.ToInt32(resSelectedGroup)).IsSelected = false;
+            groupList.FirstOrDefault(x => x.GroupId == Convert.ToInt32(resSelectedGroup)).IsSelected = false;
         }
 
-        groupList.FirstOrDefault(x => x.Id == id).IsSelected = true;
-        SecureStorage.SetAsync(SD.CurrentGroup, id.ToString());
+        var gr = groupList.FirstOrDefault(x => x.GroupId == id);
+        gr.IsSelected = true;
+
+        fullCurrentGroup = await _groupService.GetGroupById(gr.GroupId.ToString());
+        gr.PictureUrl = fullCurrentGroup.PictureUrl;
+        string details = await SecureStorage.GetAsync(SD.UserDetails);
+        LoginModelResponse mydetails = new();
+        if (!string.IsNullOrEmpty(details))
+        {
+            mydetails = JsonConvert.DeserializeObject<LoginModelResponse>(details);
+            var me = fullCurrentGroup.UsersInGroup.FirstOrDefault(x => x.UserId == mydetails.Id.ToString());
+            if (me.AvatarUrl != null)
+            {
+                await SecureStorage.SetAsync(SD.ProfilePicture, me.AvatarUrl);
+            }
+            if (me.Role == "CREATOR" || me.Role == "0")
+            {
+                IsUserCreatorOfCurrentGroup = true;
+            }
+        }
+        await SecureStorage.SetAsync(SD.CurrentGroup, id.ToString());
+
         StateHasChanged();
     }
     public bool IsProcessing { get; set; } = false;
@@ -68,10 +89,29 @@ else
     protected override async Task OnInitializedAsync()
     {
         IsProcessing = true;
-        groupList = await _groupService.GetAllMyGroups();
-        if (groupList.Any())
+        groupList = await _groupService.GetMyGroupsNamesAndAvatars();
+        if (groupList != null)
         {
-            ChouseGroupe(groupList[0].Id);
+            if (groupList.Any())
+            {
+                string currentGr = await SecureStorage.GetAsync(SD.CurrentGroup);
+                if (string.IsNullOrEmpty(currentGr))
+                {
+                    ChouseGroupe(groupList[0].GroupId);
+                }
+                else
+                {
+                    ChouseGroupe(Convert.ToInt32(currentGr));
+                }
+            }
+            else
+            {
+                IsUserCreatorOfCurrentGroup = false;
+            }
+        }
+        else
+        {
+            IsUserCreatorOfCurrentGroup = false;
         }
         IsProcessing = false;
     }
